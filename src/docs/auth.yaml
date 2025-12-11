@@ -1,0 +1,245 @@
+openapi: 3.0.0
+info:
+  title: Auth API
+  version: 1.0.0
+  description: API for user authentication
+
+servers:
+  - url: http://localhost:8080
+
+components:
+  schemas:
+    SignupRequest:
+      type: object
+      required:
+        - role
+        - firstName
+        - lastName
+        - email
+        - password
+      properties:
+        role:
+          type: string
+          example: user
+        firstName:
+          type: string
+          example: Alex
+        lastName:
+          type: string
+          example: Smith
+        email:
+          type: string
+          format: email
+          example: alex@mail.com
+        password:
+          type: string
+          format: password
+          example: secret123
+
+    SignupResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "640f0dc5e4c123001f9a12ab"
+        role:
+          type: string
+          example: user
+        firstName:
+          type: string
+          example: Alex
+        lastName:
+          type: string
+          example: Smith
+        email:
+          type: string
+          example: alex@mail.com
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: alex@mail.com
+        password:
+          type: string
+          format: password
+          example: secret123
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              example: "640f0dc5e4c123001f9a12ab"
+            email:
+              type: string
+              example: alex@mail.com
+            role:
+              type: string
+              example: user
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Invalid credentials"
+
+paths:
+  /auth/signup:
+    post:
+      summary: Register a new user
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+      responses:
+        "201":
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupResponse"
+        "400":
+          description: Registration error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      summary: User login
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      summary: Logout user (clears cookies)
+      tags:
+        - Auth
+      responses:
+        "204":
+          description: Successfully logged out
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/refresh:
+    post:
+      summary: Refresh access token using refresh token
+      tags:
+        - Auth
+      responses:
+        "200":
+          description: New access token issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Unauthorized / refresh token missing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/reset-password:
+    post:
+      summary: Send reset password email
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: alex@mail.com
+      responses:
+        "204":
+          description: Email sent
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/reset-password/{token}:
+    post:
+      summary: Update password using reset token
+      tags:
+        - Auth
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+            example: "reset-token-123456"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  format: password
+                  example: newSecret123
+      responses:
+        "204":
+          description: Password successfully updated
+        "400":
+          description: Invalid token / request error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"

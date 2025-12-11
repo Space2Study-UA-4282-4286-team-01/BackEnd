@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
+const { swaggerUi, swaggerSpec } = require('./swagger')
 
 const {
   config: { CLIENT_URL }
@@ -22,6 +23,7 @@ const initialization = (app) => {
     })
   )
 
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
   app.use('/', router)
 
   app.use((_req, _res, next) => {
