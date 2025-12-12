@@ -1,3 +1,5 @@
+const { OAuth2Client } = require('google-auth-library')
+
 const tokenService = require('~/services/token')
 const emailService = require('~/services/email')
 const { getUserByEmail, createUser, privateUpdateUser, getUserById } = require('~/services/user')
@@ -7,12 +9,29 @@ const {
   INCORRECT_CREDENTIALS,
   BAD_RESET_TOKEN,
   BAD_REFRESH_TOKEN,
-  USER_NOT_FOUND
+  USER_NOT_FOUND,
+  BAD_ID_TOKEN
 } = require('~/consts/errors')
 const emailSubject = require('~/consts/emailSubject')
 const {
   tokenNames: { REFRESH_TOKEN, RESET_TOKEN, CONFIRM_TOKEN }
 } = require('~/consts/auth')
+const {
+  gmailCredentials: { clientId }
+} = require('~/configs/config')
+
+
+const client = new OAuth2Client(clientId)
+
+const generatePassword = () => {
+  const length = 10
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let retVal = ''
+  for (let i = 0, n = charset.length; i < length; ++i) {
+    retVal += charset.charAt(Math.floor(Math.random() * n))
+  }
+  return retVal
+}
 
 const authService = {
   signup: async (role, firstName, lastName, email, password, language) => {
@@ -34,7 +53,7 @@ const authService = {
       throw createError(401, USER_NOT_FOUND)
     }
 
-    const checkedPassword = (password === user.password) || isFromGoogle
+    const checkedPassword = (await user.checkPassword(password)) || isFromGoogle
 
     if (!checkedPassword) {
       throw createError(401, INCORRECT_CREDENTIALS)
@@ -58,9 +77,35 @@ const authService = {
     return tokens
   },
 
+  googleLogin: async (idToken) => {
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken,
+        audience: clientId
+      })
+
+      const { name, email, given_name, family_name } = ticket.getPayload()
+
+      const user = await getUserByEmail(email)
+
+      if (user) {
+        return await authService.login(email, null, true)
+      }
+
+      const password = generatePassword()
+      const newUser = await createUser('student', given_name, family_name, email, password)
+
+      await privateUpdateUser(newUser._id, { isEmailConfirmed: true })
+      return await authService.login(email, password, true)
+    } catch (e) {
+      throw createError(400, BAD_ID_TOKEN)
+    }
+  },
+
   logout: async (refreshToken) => {
     await tokenService.removeRefreshToken(refreshToken)
   },
+
 
   refreshAccessToken: async (refreshToken) => {
     const tokenData = tokenService.validateRefreshToken(refreshToken)
