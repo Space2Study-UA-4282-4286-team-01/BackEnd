@@ -60,6 +60,10 @@ const errors = {
     code: 'BAD_REFRESH_TOKEN',
     message: 'The refresh token is either invalid or has expired.'
   },
+  BAD_ID_TOKEN: {
+    code: 'BAD_ID_TOKEN',
+    message: 'The ID token is either invalid or has expired.'
+  },
   UNAUTHORIZED: {
     code: 'UNAUTHORIZED',
     message: 'The requested URL requires user authorization.'

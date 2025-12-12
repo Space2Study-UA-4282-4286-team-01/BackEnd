@@ -9,4 +9,11 @@ const loginValidationSchema = {
   }
 }
 
-module.exports = { loginValidationSchema }
+const googleLoginValidationSchema = {
+  idToken: {
+    type: 'string',
+    required: true
+  }
+}
+
+module.exports = { loginValidationSchema, googleLoginValidationSchema }
