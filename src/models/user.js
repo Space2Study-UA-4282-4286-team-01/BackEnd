@@ -1,5 +1,4 @@
 const { Schema, model } = require('mongoose')
-const bcrypt = require('bcrypt')
 const {
   enums: { APP_LANG_ENUM, SPOKEN_LANG_ENUM, STATUS_ENUM, ROLE_ENUM, LOGIN_ROLE_ENUM }
 } = require('~/consts/validation')
@@ -214,17 +213,5 @@ const userSchema = new Schema(
     id: false
   }
 )
-
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next()
-  }
-  this.password = await bcrypt.hash(this.password, 12)
-  next()
-})
-
-userSchema.methods.checkPassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password)
-}
 
 module.exports = model(USER, userSchema)
