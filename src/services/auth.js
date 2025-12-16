@@ -1,4 +1,5 @@
 const { OAuth2Client } = require('google-auth-library')
+const bcrypt = require('bcrypt')
 
 const tokenService = require('~/services/token')
 const emailService = require('~/services/email')
@@ -14,7 +15,8 @@ const {
 } = require('~/consts/errors')
 const emailSubject = require('~/consts/emailSubject')
 const {
-  tokenNames: { REFRESH_TOKEN, RESET_TOKEN, CONFIRM_TOKEN }
+  tokenNames: { REFRESH_TOKEN, RESET_TOKEN, CONFIRM_TOKEN },
+  SALT
 } = require('~/consts/auth')
 const {
   gmailCredentials: { clientId }
@@ -35,7 +37,8 @@ const generatePassword = () => {
 
 const authService = {
   signup: async (role, firstName, lastName, email, password, language) => {
-    const user = await createUser(role, firstName, lastName, email, password, language)
+    const hashPassword = bcrypt.hashSync(password, SALT);
+    const user = await createUser(role, firstName, lastName, email, hashPassword, language)
 
     const confirmToken = tokenService.generateConfirmToken({ id: user._id, role })
     await tokenService.saveToken(user._id, confirmToken, CONFIRM_TOKEN)
@@ -53,7 +56,8 @@ const authService = {
       throw createError(401, USER_NOT_FOUND)
     }
 
-    const checkedPassword = (await user.checkPassword(password)) || isFromGoogle
+    const isMatch = bcrypt.compareSync(password, user.password)
+    const checkedPassword = isMatch || isFromGoogle
 
     if (!checkedPassword) {
       throw createError(401, INCORRECT_CREDENTIALS)
