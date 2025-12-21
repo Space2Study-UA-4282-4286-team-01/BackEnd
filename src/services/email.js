@@ -6,8 +6,15 @@ const {
 } = require('~/configs/config')
 const { createError } = require('~/utils/errorsHelper')
 const { TEMPLATE_NOT_FOUND } = require('~/consts/errors')
+const path = require('path');
+const currentDir = process.cwd()
+const emailsTemplatesPath = path.join(currentDir, 'src', 'emails');
 
-const emailTemplates = new EmailTemplates()
+const emailTemplates = new EmailTemplates({
+  views: {
+    root: emailsTemplatesPath
+  }
+})
 
 const emailService = {
   sendEmail: async (email, subject, language, text = {}) => {
@@ -18,6 +25,11 @@ const emailService = {
     }
 
     const langTemplate = templateToSend[language]
+
+    console.log('langTemplate', langTemplate, text);
+    console.log('USERRR', user, email);
+    
+    
 
     const html = await emailTemplates.render(langTemplate.template, text)
 
