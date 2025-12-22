@@ -140,7 +140,12 @@ const validationErrors = {
     message: 'Password must contain at least one alphabetic and one numeric character.'
   },
   firstName: errors.NAME_FIELD_IS_NOT_OF_PROPER_FORMAT('firstName'),
-  lastName: errors.NAME_FIELD_IS_NOT_OF_PROPER_FORMAT('lastName')
+  lastName: errors.NAME_FIELD_IS_NOT_OF_PROPER_FORMAT('lastName'),
+  color: {
+    code: 'COLOR_NOT_VALID',
+    message: 'Color must be a valid HEX value.',
+    regex: /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i
+  }
 }
 
 module.exports = errors
