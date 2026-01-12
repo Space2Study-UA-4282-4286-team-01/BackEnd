@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose')
 
-const { USER, RESOURCES_CATEGORY } = require('~/consts/models')
+const { RESOURCES_CATEGORY } = require('~/consts/models')
 const {
   FIELD_CANNOT_BE_EMPTY,
   FIELD_CANNOT_BE_LONGER,
@@ -42,11 +42,6 @@ const resourcesCategorySchema = new Schema(
         type: Number,
         default: 0
       }
-    },
-    author: {
-      type: Schema.Types.ObjectId,
-      ref: USER,
-      required: [true, FIELD_CANNOT_BE_EMPTY('author')]
     }
   },
   {
