@@ -1,15 +1,13 @@
 const ResourcesCategory = require('~/models/resourcesCategory')
-const { createForbiddenError } = require('~/utils/errorsHelper')
 
 const resourcesCategoryService = {
-  createResourcesCategory: async (author, data) => {
+  createResourcesCategory: async (data) => {
     const { name, appearance } = data
     const { color, icon } = appearance
 
     return await ResourcesCategory.create({
       name,
-      appearance: { color, icon },
-      author
+      appearance: { color, icon }
     })
   },
 
@@ -28,13 +26,8 @@ const resourcesCategoryService = {
     return await ResourcesCategory.find(match).select('name').exec()
   },
 
-  updateResourceCategory: async (id, currentUserId, updateData) => {
+  updateResourceCategory: async (id, updateData) => {
     const resourceCategory = await ResourcesCategory.findById(id).exec()
-
-    const author = resourceCategory.author.toString()
-    if (currentUserId !== author) {
-      throw createForbiddenError()
-    }
 
     for (let field in updateData) {
       resourceCategory[field] = updateData[field]
