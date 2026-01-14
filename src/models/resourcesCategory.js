@@ -15,7 +15,8 @@ const resourcesCategorySchema = new Schema(
       type: String,
       required: [true, FIELD_CANNOT_BE_EMPTY('name')],
       minLength: [1, FIELD_CANNOT_BE_SHORTER('name', 1)],
-      maxLength: [50, FIELD_CANNOT_BE_LONGER('name', 50)]
+      maxLength: [50, FIELD_CANNOT_BE_LONGER('name', 50)],
+      unique: true
     },
     appearance: {
       icon: {
