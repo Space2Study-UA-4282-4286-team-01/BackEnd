@@ -4,19 +4,16 @@ const getSortOptions = require('~/utils/getSortOptions')
 const getRegex = require('~/utils/getRegex')
 
 const createResourcesCategory = async (req, res) => {
-  const { id: author } = req.user
   const data = req.body
-
-  const newResourcesCategory = await resourcesCategoryService.createResourcesCategory(author, data)
+  const newResourcesCategory = await resourcesCategoryService.createResourcesCategory(data)
 
   res.status(201).send(newResourcesCategory)
 }
 
 const getResourcesCategories = async (req, res) => {
-  const { id: author } = req.user
   const { name, sort, skip, limit } = req.query
 
-  const match = getMatchOptions({ author, name: getRegex(name) })
+  const match = getMatchOptions({ name: getRegex(name) })
   const sortOptions = getSortOptions(sort)
 
   const resourcesCategories = await resourcesCategoryService.getResourcesCategories(
@@ -41,10 +38,9 @@ const getResourcesCategoriesNames = async (req, res) => {
 
 const updateResourceCategory = async (req, res) => {
   const { id } = req.params
-  const { id: author } = req.user
   const updateData = req.body
 
-  await resourcesCategoryService.updateResourceCategory(id, author, updateData)
+  await resourcesCategoryService.updateResourceCategory(id, updateData)
 
   res.status(204).end()
 }

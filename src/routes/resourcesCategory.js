@@ -8,16 +8,16 @@ const idValidation = require('~/middlewares/idValidation')
 const resourcesCategoryController = require('~/controllers/resourcesCategory')
 
 const {
-  roles: { TUTOR }
+  roles: { TUTOR, STUDENT }
 } = require('~/consts/auth')
 
 const params = [{ model: ResourceCategory, idName: 'id' }]
 router.param('id', idValidation)
 
 router.use(authMiddleware)
-router.use(restrictTo(TUTOR))
 router.get('/', asyncWrapper(resourcesCategoryController.getResourcesCategories))
 router.get('/names', asyncWrapper(resourcesCategoryController.getResourcesCategoriesNames))
+router.use(restrictTo(TUTOR, STUDENT))
 router.post('/', asyncWrapper(resourcesCategoryController.createResourcesCategory))
 router.patch('/:id', isEntityValid({ params }), asyncWrapper(resourcesCategoryController.updateResourceCategory))
 router.delete('/:id', isEntityValid({ params }), asyncWrapper(resourcesCategoryController.deleteResourceCategory))
