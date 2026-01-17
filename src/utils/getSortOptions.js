@@ -1,7 +1,16 @@
 const getSortOptions = (sort) => {
   try {
-    const { order, orderBy } = JSON.parse(sort)
-    return { [orderBy || 'updatedAt']: order || 'asc' }
+    const { order = 'asc', orderBy } = JSON.parse(sort)
+
+    let sortField = 'updatedAt'
+
+    if (orderBy === 'date') {
+      sortField = 'updatedAt'
+    } else if (orderBy) {
+      sortField = orderBy
+    }
+
+    return { [sortField]: order }
   } catch (error) {
     return { updatedAt: 'asc' }
   }
