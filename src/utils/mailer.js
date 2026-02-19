@@ -6,6 +6,7 @@ const {
 } = require('~/configs/config')
 const { createError } = require('~/utils/errorsHelper')
 const { API_TOKEN_NOT_RETRIEVED, EMAIL_NOT_SENT } = require('~/consts/errors')
+const { log } = require('winston')
 
 const OAuth2 = google.auth.OAuth2
 
@@ -15,8 +16,10 @@ const getAccessToken = async () => {
 
     oAuth2Client.setCredentials({ refresh_token: refreshToken })
     const accessToken = await oAuth2Client.getAccessToken()
-
-    return accessToken
+    console.log('my bug imfo:');
+    console.log('RAW ACCESS TOKEN:', accessToken)
+    console.log('ACCESS TOKEN TYPE:', typeof accessToken)
+    return accessToken.token
   } catch (err) {
     logger.error(err)
     throw createError(400, API_TOKEN_NOT_RETRIEVED)
@@ -47,6 +50,8 @@ const createTransport = async () => {
 
 const sendMail = async (mailOptions) => {
   try {
+    console.log('were here1', mailOptions);
+    
     const transporter = await createTransport()
     await transporter.verify()
     const result = await transporter.sendMail(mailOptions)
@@ -54,6 +59,7 @@ const sendMail = async (mailOptions) => {
 
     return result
   } catch (err) {
+    console.log('were here2', err);
     logger.error(err)
     throw createError(400, EMAIL_NOT_SENT)
   }
